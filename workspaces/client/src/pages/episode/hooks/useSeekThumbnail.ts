@@ -1,4 +1,3 @@
-import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { StandardSchemaV1 } from '@standard-schema/spec';
 import * as schema from '@wsh-2025/schema/src/api/schema';
 import { Parser } from 'm3u8-parser';
@@ -9,6 +8,9 @@ interface Params {
 }
 
 async function getSeekThumbnail({ episode }: Params) {
+  // 1. 動的インポートで FFmpeg を読み込み
+  const { FFmpeg } = await import('@ffmpeg/ffmpeg');
+
   // HLS のプレイリストを取得
   const playlistUrl = `/streams/episode/${episode.id}/playlist.m3u8`;
   const parser = new Parser();
@@ -35,6 +37,7 @@ async function getSeekThumbnail({ episode }: Params) {
       });
     }),
   );
+
   // FFmpeg にセグメントファイルを追加
   for (const file of segmentFiles) {
     await ffmpeg.writeFile(file.id, new Uint8Array(file.binary));
@@ -55,7 +58,7 @@ async function getSeekThumbnail({ episode }: Params) {
   await ffmpeg.exec(
     [
       ['-i', 'concat.mp4'],
-      ['-vf', "fps=30,select='not(mod(n\\,30))',scale=160:90,tile=250x1"],
+      ["-vf", "fps=30,select='not(mod(n\\,30))',scale=160:90,tile=250x1"],
       ['-frames:v', '1'],
       'preview.jpg',
     ].flat(),
