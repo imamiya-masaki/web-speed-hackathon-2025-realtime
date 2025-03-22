@@ -59,9 +59,9 @@ const config = {
   },
 
   output: {
-    chunkFilename: '[name]-[contenthash].js',
+    chunkFilename: 'chunk-[contenthash].js',
     chunkFormat: false,
-    filename: '[main].js',
+    filename: 'main.js',
     path: path.resolve(import.meta.dirname, './dist'),
     publicPath: 'auto',
   },
