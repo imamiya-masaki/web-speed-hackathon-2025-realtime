@@ -12,7 +12,7 @@ export function createRoutes(store: ReturnType<typeof createStore>): RouteObject
             import('@wsh-2025/client/src/pages/home/components/HomePage').then(
               ({ HomePage, prefetch }) => ({
                 Component: HomePage,
-                loader: ({request}) => {
+                loader: () => {
                   return prefetch(store)},
               })
             ),
