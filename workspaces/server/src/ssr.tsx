@@ -39,23 +39,23 @@ export function registerSsr(app: FastifyInstance): void {
   });
 
   app.get('/*', async (req, reply) => {
-    console.log('start', performance.now())
+    const start = performance.now();
     // @ts-expect-error ................
     const request = createStandardRequest(req, reply);
 
     const store = createStore({});
-    console.log('margin1', performance.now());
+    console.log('margin1', performance.now() - start);
     const handler = createStaticHandler(createRoutes(store));
-    console.log('createStaticHandler', performance.now());
+    console.log('createStaticHandler', performance.now() - start);
     const context = await handler.query(request);
-    console.log('handler.query', performance.now());
+    console.log('handler.query', performance.now() - start);
     if (context instanceof Response) {
       return reply.send(context);
     }
-    console.log('margin2', performance.now());
+    console.log('margin2', performance.now() - start);
 
     const router = createStaticRouter(handler.dataRoutes, context);
-    renderToString(
+    const appHtml = renderToString(
       <StrictMode>
         <StoreProvider createStore={() => store}>
           <StaticRouterProvider context={context} hydrate={false} router={router} />
@@ -80,7 +80,7 @@ export function registerSsr(app: FastifyInstance): void {
           <script src="/public/main.js"></script>
           ${imagePaths.map((imagePath) => `<link as="image" href="${imagePath}" rel="preload" />`).join('\n')}
         </head>
-        <body></body>
+        <div id="root">${appHtml}</div>
       </html>
       <script>
         window.__staticRouterHydrationData = ${htmlescape({

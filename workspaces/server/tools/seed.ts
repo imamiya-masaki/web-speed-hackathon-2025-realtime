@@ -100,7 +100,7 @@ async function main() {
     await reset(database, schema);
 
     // Create streams
-    console.log('Creating streams...');
+    console.log('Creating streams...',performance.now());
     const streamList = await database
       .insert(schema.stream)
       .values([
@@ -112,7 +112,7 @@ async function main() {
       .returning();
 
     // Create channels
-    console.log('Creating channels...');
+    console.log('Creating channels...', performance.now());
     const channelList: (typeof schema.channel.$inferSelect)[] = [];
     {
       const data: (typeof schema.channel.$inferInsert)[] = CHANNEL_NAME_LIST.map(({ id, name }) => ({
@@ -125,7 +125,7 @@ async function main() {
     }
 
     // Create series
-    console.log('Creating series...');
+    console.log('Creating series...', performance.now());
     const seriesList: (typeof schema.series.$inferSelect)[] = [];
     {
       const data: (typeof schema.series.$inferInsert)[] = Array.from({ length: 30 }, () => ({
@@ -139,7 +139,7 @@ async function main() {
     }
 
     // Create episodes
-    console.log('Creating episodes...');
+    console.log('Creating episodes...', performance.now());
     const episodeList: (typeof schema.episode.$inferSelect)[] = [];
     for (const series of seriesList) {
       const data: (typeof schema.episode.$inferInsert)[] = Array.from(
@@ -160,7 +160,7 @@ async function main() {
     }
 
     // Create programs
-    console.log('Creating programs...');
+    console.log('Creating programs...', performance.now());
     const programList: (typeof schema.program.$inferInsert)[] = [];
     const episodeListGroupedByStreamId = Object.values(Object.groupBy(episodeList, (episode) => episode.streamId));
     for (const channel of channelList) {
@@ -195,7 +195,7 @@ async function main() {
     await database.insert(schema.program).values(programList);
 
     // Create recommended modules
-    console.log('Creating recommended modules...');
+    console.log('Creating recommended modules...', performance.now());
     for (const reference of [
       ...seriesList.map((s) => ({ id: s.id, type: 'series', series: s }) as const),
       ...episodeList.map((e) => ({ id: e.id, type: 'episode', episode: e }) as const),
@@ -293,7 +293,7 @@ async function main() {
     }
 
     // Create test users
-    console.log('Creating test users...');
+    console.log('Creating test users...', performance.now());
     await database.insert(schema.user).values([
       {
         email: 'test@example.com',

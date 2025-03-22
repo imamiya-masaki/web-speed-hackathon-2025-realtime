@@ -17,7 +17,8 @@ declare global {
 
 function main() {
   const store = createStore({});
-  const router = createBrowserRouter(createRoutes(store), {});
+  const initialHydration = window.__staticRouterHydrationData;
+  const router = createBrowserRouter(createRoutes(store), {hydrationData: initialHydration});
 
   hydrateRoot(
     document,
@@ -29,4 +30,3 @@ function main() {
   );
 }
 main();
-// document.addEventListener('DOMContentLoaded', main);
