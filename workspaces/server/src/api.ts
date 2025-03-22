@@ -1,3 +1,4 @@
+import { episode } from './../../schema/src/database/schema';
 import 'zod-openapi/extend';
 
 import { randomBytes } from 'node:crypto';
@@ -22,7 +23,13 @@ import {
 import { z } from 'zod';
 import type { ZodOpenApiVersion } from 'zod-openapi';
 
+// thumbnail
+import { Parser } from 'm3u8-parser';
+import {FFmpeg} from '@ffmpeg/ffmpeg'
+
 import { getDatabase, initializeDatabase } from '@wsh-2025/server/src/drizzle/database';
+
+// thumbnail
 
 export async function registerApi(app: FastifyInstance): Promise<void> {
   app.setValidatorCompiler(validatorCompiler);
@@ -645,6 +652,96 @@ export async function registerApi(app: FastifyInstance): Promise<void> {
       reply.code(200).send();
     },
   });
+
+
+  /**
+   * 後で対応今は一旦thumbnailURLを参照している
+   */
+  api.route({
+    method: 'GET',
+    url: '/episodes/:episodeId/thumbnail',
+    schema: {
+      tags: ['エピソード'],
+      params: z.object({
+        episodeId: z.string(),
+      }),
+      response: {
+        200: {
+          content: {
+            'application/json': {
+              "schema": z.object({url: z.string()}),
+            },
+          },
+        },
+      },
+    } satisfies FastifyZodOpenApiSchema,
+    handler: async function getEpisodeThumbnail(req, reply) {
+      const episodeId = req.params.episodeId
+      const host = req.host
+      console.log('episodeId', episodeId)
+
+  // HLS のプレイリストを取得
+  const playlistUrl = `https://${host}/streams/episode/${episodeId}/playlist.m3u8`;
+  const parser = new Parser();
+  parser.push(await fetch(playlistUrl).then((res) => res.text()));
+  parser.end();
+
+  // FFmpeg の初期化
+  const ffmpeg = new FFmpeg();
+  await ffmpeg.load({
+    coreURL: await import('@ffmpeg/core?arraybuffer').then(({ default: b }) => {
+      return URL.createObjectURL(new Blob([b], { type: 'text/javascript' }));
+    }),
+    wasmURL: await import('@ffmpeg/core/wasm?arraybuffer').then(({ default: b }) => {
+      return URL.createObjectURL(new Blob([b], { type: 'application/wasm' }));
+    }),
+  });
+
+  // 動画のセグメントファイルを取得
+  const segmentFiles = await Promise.all(
+    parser.manifest.segments.map((s) => {
+      return fetch(s.uri).then(async (res) => {
+        const binary = await res.arrayBuffer();
+        return { binary, id: Math.random().toString(36).slice(2) };
+      });
+    }),
+  );
+
+  // FFmpeg にセグメントファイルを追加
+  for (const file of segmentFiles) {
+    await ffmpeg.writeFile(file.id, new Uint8Array(file.binary));
+  }
+
+  // セグメントファイルをひとつの mp4 動画に結合
+  await ffmpeg.exec(
+    [
+      ['-i', `concat:${segmentFiles.map((f) => f.id).join('|')}`],
+      ['-c:v', 'copy'],
+      ['-map', '0:v:0'],
+      ['-f', 'mp4'],
+      'concat.mp4',
+    ].flat(),
+  );
+
+  // fps=30 とみなして、30 フレームごと（1 秒ごと）にサムネイルを生成
+  await ffmpeg.exec(
+    [
+      ['-i', 'concat.mp4'],
+      ["-vf", "fps=30,select='not(mod(n\\,30))',scale=160:90,tile=250x1"],
+      ['-frames:v', '1'],
+      'preview.jpg',
+    ].flat(),
+  );
+
+  const output = await ffmpeg.readFile('preview.jpg');
+  ffmpeg.terminate();
+  const data = {
+    url: URL.createObjectURL(new Blob([output], { type: 'image/jpeg' }))
+  }
+  reply.code(200).send(data);
+    },
+  });
+  
 
   /* eslint-enable sort/object-properties */
 }

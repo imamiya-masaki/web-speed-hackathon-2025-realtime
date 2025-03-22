@@ -4,7 +4,7 @@ import { useRef } from 'react';
 
 import { usePointer } from '@wsh-2025/client/src/features/layout/hooks/usePointer';
 import { useDuration } from '@wsh-2025/client/src/pages/episode/hooks/useDuration';
-import { useSeekThumbnail } from '@wsh-2025/client/src/pages/episode/hooks/useSeekThumbnail';
+// import { useSeekThumbnail } from '@wsh-2025/client/src/pages/episode/hooks/useSeekThumbnail';
 
 const SEEK_THUMBNAIL_WIDTH = 160;
 
@@ -14,7 +14,8 @@ interface Props {
 
 export const SeekThumbnail = ({ episode }: Props) => {
   const ref = useRef<HTMLDivElement>(null);
-  const seekThumbnail = useSeekThumbnail({ episode });
+  // 一旦thumbnailを取り出すだけ
+  const seekThumbnail = episode.thumbnailUrl;
   const pointer = usePointer();
   const duration = useDuration();
 

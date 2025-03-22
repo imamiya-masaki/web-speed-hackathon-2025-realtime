@@ -7,6 +7,7 @@ console.log('webpack')
  * NODE_ENV が 'development' なら true、そうでなければ false
  */
 const isDev = process.env["NODE_ENV"] === 'development';
+const isAnalyze = process.env["NODE_ENV"] === 'analyze';
 /** @type {import('webpack').Configuration} */
 const config = {
   // mode と devtool を分岐
@@ -70,22 +71,10 @@ const config = {
     new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }),
     new webpack.EnvironmentPlugin({ API_BASE_URL: '/api', NODE_ENV: '' }),
     // 開発環境のときだけ BundleAnalyzerPlugin を追加
-    ...(isDev ? [new BundleAnalyzerPlugin()] : []),
+    ...(isAnalyze ? [new BundleAnalyzerPlugin()] : []),
   ],
 
   resolve: {
-    alias: {
-      '@ffmpeg/core$': path.resolve(
-        import.meta.dirname,
-        'node_modules',
-        '@ffmpeg/core/dist/umd/ffmpeg-core.js'
-      ),
-      '@ffmpeg/core/wasm$': path.resolve(
-        import.meta.dirname,
-        'node_modules',
-        '@ffmpeg/core/dist/umd/ffmpeg-core.wasm'
-      ),
-    },
     extensions: ['.js', '.cjs', '.mjs', '.ts', '.cts', '.mts', '.tsx', '.jsx'],
   },
 };

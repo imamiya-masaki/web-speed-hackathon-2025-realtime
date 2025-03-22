@@ -4,6 +4,7 @@
   "scripts": {
     "build": "wireit",
     "build:dev": "wireit",
+    "build:analyze": "wireit",
     "format": "wireit",
     "format:eslint": "wireit",
     "format:prettier": "wireit"
@@ -94,6 +95,18 @@
     },
     "build:dev": {
       "command": "NODE_ENV=development webpack",
+      "files": [
+        "../../pnpm-lock.yaml",
+        "../schema/src/**/*",
+        "./src/**/*",
+        "./webpack.config.mjs"
+      ],
+      "output": [
+        "./dist/**/*"
+      ]
+    },
+    "build:analyze": {
+      "command": "NODE_ENV=analyze webpack",
       "files": [
         "../../pnpm-lock.yaml",
         "../schema/src/**/*",

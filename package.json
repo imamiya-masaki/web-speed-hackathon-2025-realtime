@@ -4,10 +4,12 @@
   "scripts": {
     "build": "wireit",
     "build:dev": "wireit",
+    "build:analyze": "wireit",
     "heroku-build": "wireit",
     "heroku-cleanup": "wireit",
     "heroku-start": "wireit",
     "start": "wireit",
+    "start:dev": "wireit",
     "test": "wireit"
   },
   "dependencies": {
@@ -41,9 +43,19 @@
         "./workspaces/client:build"
       ]
     },
+    "start:dev": {
+      "dependencies": [
+        "./workspaces/server:start:dev"
+      ]
+    },
     "build:dev": {
       "dependencies": [
         "./workspaces/client:build:dev"
+      ]
+    },
+    "build:analyze": {
+      "dependencies": [
+        "./workspaces/client:build:analyze"
       ]
     },
     "heroku-build": {
