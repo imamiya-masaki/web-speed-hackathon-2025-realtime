@@ -39,16 +39,20 @@ export function registerSsr(app: FastifyInstance): void {
   });
 
   app.get('/*', async (req, reply) => {
+    console.log('start', performance.now())
     // @ts-expect-error ................
     const request = createStandardRequest(req, reply);
 
     const store = createStore({});
+    console.log('margin1', performance.now());
     const handler = createStaticHandler(createRoutes(store));
+    console.log('createStaticHandler', performance.now());
     const context = await handler.query(request);
-
+    console.log('handler.query', performance.now());
     if (context instanceof Response) {
       return reply.send(context);
     }
+    console.log('margin2', performance.now());
 
     const router = createStaticRouter(handler.dataRoutes, context);
     renderToString(
@@ -66,6 +70,7 @@ export function registerSsr(app: FastifyInstance): void {
       getFilePaths('public/logos', rootDir),
     ].flat();
 
+    console.log('end',performance.now())
     reply.type('text/html').send(/* html */ `
       <!DOCTYPE html>
       <html lang="ja">
