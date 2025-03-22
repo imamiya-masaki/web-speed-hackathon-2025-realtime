@@ -168,7 +168,7 @@ export const  createPreview = async ({id, numberOfChunks}: {id: string, numberOf
     '-f', 'concat',        // concat demuxer
     '-safe', '0',          // パスにスペースがあってもOK
     '-i', listFilePath,
-    '-vf', "fps=1,scale=160:90,tile=5x2",
+    '-vf', "fps=30,select='not(mod(n,30))',scale=160:90,tile=250x1",
     '-frames:v', '1',
     outputPath,
   ];
