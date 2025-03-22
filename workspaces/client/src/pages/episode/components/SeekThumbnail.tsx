@@ -14,8 +14,9 @@ interface Props {
 
 export const SeekThumbnail = ({ episode }: Props) => {
   const ref = useRef<HTMLDivElement>(null);
+  const origin = location.origin;
   // 一旦thumbnailを取り出すだけ
-  const seekThumbnail = episode.thumbnailUrl;
+  const seekThumbnail = `${origin}/public/preview/${episode.streamId}.jpeg`;
   const pointer = usePointer();
   const duration = useDuration();
 
