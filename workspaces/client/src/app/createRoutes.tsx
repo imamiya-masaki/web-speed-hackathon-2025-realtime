@@ -1,6 +1,4 @@
-import lazy from 'p-min-delay';
 import { RouteObject } from 'react-router';
-
 import { Document, prefetch } from '@wsh-2025/client/src/app/Document';
 import { createStore } from '@wsh-2025/client/src/app/createStore';
 
@@ -10,100 +8,68 @@ export function createRoutes(store: ReturnType<typeof createStore>): RouteObject
       children: [
         {
           index: true,
-          async lazy() {
-            const { HomePage, prefetch } = await lazy(
-              import('@wsh-2025/client/src/pages/home/components/HomePage'),
-              0,
-            );
-            return {
-              Component: HomePage,
-              async loader() {
-                return await prefetch(store);
-              },
-            };
-          },
+          lazy: () =>
+            import('@wsh-2025/client/src/pages/home/components/HomePage').then(
+              ({ HomePage, prefetch }) => ({
+                Component: HomePage,
+                loader: () => prefetch(store),
+              })
+            ),
         },
         {
-          async lazy() {
-            const { EpisodePage, prefetch } = await lazy(
-              import('@wsh-2025/client/src/pages/episode/components/EpisodePage'),
-              0,
-            );
-            return {
-              Component: EpisodePage,
-              async loader({ params }) {
-                return await prefetch(store, params);
-              },
-            };
-          },
           path: '/episodes/:episodeId',
+          lazy: () =>
+            import('@wsh-2025/client/src/pages/episode/components/EpisodePage').then(
+              ({ EpisodePage, prefetch }) => ({
+                Component: EpisodePage,
+                loader: ({ params }) => prefetch(store, params),
+              })
+            ),
         },
         {
-          async lazy() {
-            const { prefetch, ProgramPage } = await lazy(
-              import('@wsh-2025/client/src/pages/program/components/ProgramPage'),
-              0,
-            );
-            return {
-              Component: ProgramPage,
-              async loader({ params }) {
-                return await prefetch(store, params);
-              },
-            };
-          },
           path: '/programs/:programId',
+          lazy: () =>
+            import('@wsh-2025/client/src/pages/program/components/ProgramPage').then(
+              ({ ProgramPage, prefetch }) => ({
+                Component: ProgramPage,
+                loader: ({ params }) => prefetch(store, params),
+              })
+            ),
         },
         {
-          async lazy() {
-            const { prefetch, SeriesPage } = await lazy(
-              import('@wsh-2025/client/src/pages/series/components/SeriesPage'),
-              0,
-            );
-            return {
-              Component: SeriesPage,
-              async loader({ params }) {
-                return await prefetch(store, params);
-              },
-            };
-          },
           path: '/series/:seriesId',
+          lazy: () =>
+            import('@wsh-2025/client/src/pages/series/components/SeriesPage').then(
+              ({ SeriesPage, prefetch }) => ({
+                Component: SeriesPage,
+                loader: ({ params }) => prefetch(store, params),
+              })
+            ),
         },
         {
-          async lazy() {
-            const { prefetch, TimetablePage } = await lazy(
-              import('@wsh-2025/client/src/pages/timetable/components/TimetablePage'),
-              0,
-            );
-            return {
-              Component: TimetablePage,
-              async loader() {
-                return await prefetch(store);
-              },
-            };
-          },
           path: '/timetable',
+          lazy: () =>
+            import('@wsh-2025/client/src/pages/timetable/components/TimetablePage').then(
+              ({  TimetablePage, prefetch }) => ({
+                Component: TimetablePage,
+                loader: () => prefetch(store),
+              })
+            ),
         },
         {
-          async lazy() {
-            const { NotFoundPage, prefetch } = await lazy(
-              import('@wsh-2025/client/src/pages/not_found/components/NotFoundPage'),
-              0,
-            );
-            return {
-              Component: NotFoundPage,
-              async loader() {
-                return await prefetch(store);
-              },
-            };
-          },
           path: '*',
+          lazy: () =>
+            import('@wsh-2025/client/src/pages/not_found/components/NotFoundPage').then(
+              ({ NotFoundPage, prefetch }) => ({
+                Component: NotFoundPage,
+                loader: () => prefetch(store),
+              })
+            ),
         },
       ],
-      Component: Document,
-      async loader() {
-        return await prefetch(store);
-      },
       path: '/',
+      Component: Document,
+      loader: () => prefetch(store),
     },
   ];
 }
