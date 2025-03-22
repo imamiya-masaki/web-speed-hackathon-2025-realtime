@@ -4,12 +4,15 @@ import { ArrayValues } from 'type-fest';
 
 import { CarouselSection } from '@wsh-2025/client/src/features/recommended/components/CarouselSection';
 import { JumbotronSection } from '@wsh-2025/client/src/features/recommended/components/JumbotronSection';
+import { useEffect } from 'react';
 
 interface Props {
   module: ArrayValues<StandardSchemaV1.InferOutput<typeof schema.getRecommendedModulesResponse>>;
 }
 
 export const RecommendedSection = ({ module }: Props) => {
+  useEffect(() => {
+  },[])
   if (module.type === 'jumbotron') {
     return <JumbotronSection module={module} />;
   } else {

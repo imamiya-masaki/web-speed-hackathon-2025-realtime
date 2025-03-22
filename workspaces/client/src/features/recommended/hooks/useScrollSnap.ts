@@ -58,8 +58,8 @@ export function useScrollSnap({ scrollPadding }: { scrollPadding: number }) {
       }, 1000);
     });
 
-    containerRef.current.addEventListener('scroll', handleScroll);
-    containerRef.current.addEventListener('scrollend', handleScrollend);
+    containerRef.current.addEventListener('scroll', handleScroll, {passive:true});
+    containerRef.current.addEventListener('scrollend', handleScrollend, );
 
     return () => {
       containerRef.current?.removeEventListener('scroll', handleScroll);

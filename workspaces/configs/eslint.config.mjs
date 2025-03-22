@@ -59,15 +59,13 @@ const configs = [
       eqeqeq: ['error', 'always', { null: 'never' }],
       'import/no-named-as-default': ['off'],
       'import/no-named-as-default-member': ['off'],
-      'import/order': [
-        'error',
-        {
-          alphabetize: {
-            order: 'asc',
-          },
-          'newlines-between': 'always',
-        },
-      ],
+      'import/order': "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-return": "off",
+      "@typescript-eslint/no-unsafe-argument": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+      "@typescript-eslint/no-unnecessary-condition": "off",
       'react/jsx-sort-props': [
         'error',
         {

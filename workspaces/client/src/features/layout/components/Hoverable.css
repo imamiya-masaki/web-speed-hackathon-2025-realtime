@@ -1,0 +1,7 @@
+.element {
+  background-color: #171717;
+}
+
+.element:hover {
+  background-color: #333;
+}

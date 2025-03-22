@@ -34,7 +34,7 @@ export function useSubscribePointer(): void {
       current.x = ev.clientX;
       current.y = ev.clientY;
     };
-    window.addEventListener('pointermove', handlePointerMove, { signal: abortController.signal });
+    window.addEventListener('pointermove', handlePointerMove, { signal: abortController.signal, passive: true });
 
     let immediate = timeoutForSetImmediate(function tick() {
       s.features.layout.updatePointer({ ...current });

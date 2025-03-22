@@ -39,10 +39,10 @@ export const Layout = ({ children }: Props) => {
       setScrollTopOffset(window.scrollY);
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, {passive: true});
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('scroll', handleScroll)
     };
   }, []);
 

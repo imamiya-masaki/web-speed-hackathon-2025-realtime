@@ -9,13 +9,23 @@ import { useRecommended } from '@wsh-2025/client/src/features/recommended/hooks/
 import { SeriesEpisodeList } from '@wsh-2025/client/src/features/series/components/SeriesEpisodeList';
 import { useSeriesById } from '@wsh-2025/client/src/features/series/hooks/useSeriesById';
 
+
 export const prefetch = async (store: ReturnType<typeof createStore>, { seriesId }: Params) => {
   invariant(seriesId);
-  const series = await store.getState().features.series.fetchSeriesById({ seriesId });
-  const modules = await store
+
+  const state = store.getState()
+  let series = state?.features?.series?.series?.[seriesId]
+  if (!series) {
+    series = await store.getState().features.series.fetchSeriesById({ seriesId });
+  }
+  const hydrateModuleData = state?.features?.recommended?.references?.[seriesId]
+  if (hydrateModuleData) {
+    return { series, modules: hydrateModuleData}
+  }
+    const modules = await store
     .getState()
     .features.recommended.fetchRecommendedModulesByReferenceId({ referenceId: seriesId });
-  return { modules, series };
+  return { series, modules };
 };
 
 export const SeriesPage = () => {

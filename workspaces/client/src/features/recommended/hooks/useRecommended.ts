@@ -6,7 +6,6 @@ interface Params {
 
 export function useRecommended({ referenceId }: Params) {
   const state = useStore((s) => s);
-
   const moduleIds = state.features.recommended.references[referenceId];
 
   const modules = (moduleIds ?? [])

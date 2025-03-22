@@ -53,44 +53,48 @@ export function registerSsr(app: FastifyInstance): void {
       return reply.send(context);
     }
     console.log('margin2', performance.now() - start);
-
     const router = createStaticRouter(handler.dataRoutes, context);
     const appHtml = renderToString(
       <StrictMode>
         <StoreProvider createStore={() => store}>
-          <StaticRouterProvider context={context} hydrate={false} router={router} />
+          <StaticRouterProvider context={context} hydrate={true} router={router} />
         </StoreProvider>
       </StrictMode>,
     );
 
+
     const rootDir = path.resolve(__dirname, '../../../');
     const imagePaths = [
       getFilePaths('public/images', rootDir),
-      getFilePaths('public/animations', rootDir),
-      getFilePaths('public/logos', rootDir),
+      // getFilePaths('public/animations', rootDir),
+      // getFilePaths('public/logos', rootDir),
     ].flat();
 
     const imageLink = imagePaths.map((imagePath) => `<link as="image" href="${imagePath}" rel="preload" fetchpriority="low"/>`).join('\n');
+    // const imageLink = null;
     // 適当なpreloadをやめさせる
     //           ${imagePaths.map((imagePath) => `<link as="image" href="${imagePath}" rel="preload" />`).join('\n')}
 
-    console.log('end',performance.now())
+    console.log('end',performance.now(), store.getState())
     reply.type('text/html').send(/* html */ `
       <!DOCTYPE html>
       <html lang="ja">
         <head>
           <meta charSet="UTF-8" />
           <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-          ${imageLink}
+          ${imageLink ?? ""}
         </head>
-        <div id="root">${appHtml}</div>
-      </html>
-      <script>
+        <script>
         window.__staticRouterHydrationData = ${htmlescape({
           actionData: context.actionData,
           loaderData: context.loaderData,
         })};
       </script>
+      <script>
+      window.__initialStoreState = ${htmlescape(store.getState())};
+      </script>
+        <div id="root">${appHtml}</div>
+      </html>
     `);
   });
 }

@@ -3,6 +3,11 @@ import { RecommendedSection } from '@wsh-2025/client/src/features/recommended/co
 import { useRecommended } from '@wsh-2025/client/src/features/recommended/hooks/useRecommended';
 
 export const prefetch = async (store: ReturnType<typeof createStore>) => {
+  const state = store.getState()
+  const hydrateData = state?.features?.recommended?.references?.["entrance"]
+  if (hydrateData) {
+    return { modules: hydrateData}
+  }
   const modules = await store
     .getState()
     .features.recommended.fetchRecommendedModulesByReferenceId({ referenceId: 'entrance' });
