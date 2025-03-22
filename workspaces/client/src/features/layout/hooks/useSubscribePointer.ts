@@ -2,6 +2,27 @@ import { useEffect } from 'react';
 
 import { useStore } from '@wsh-2025/client/src/app/StoreContext';
 
+
+/**
+ * setImmediate のブラウザ向けポリフィル。
+ * Node.js の setImmediate と同じ引数構造をエミュレートしている。
+ */
+export function timeoutForSetImmediate(
+  handler: (...args: any[]) => void,
+  ...args: any[]
+): number {
+  // setTimeout の第3引数以降をコールバック関数に引き渡せる
+  return window.setTimeout(handler, 0, ...args);
+}
+
+/**
+ * clearImmediate のブラウザ向けポリフィル。
+ * setImmediate の戻り値を受け取って、clearTimeout でキャンセルする。
+ */
+export function clearTimeoutForSetImmediate(handle: number): void {
+  window.clearTimeout(handle);
+}
+
 export function useSubscribePointer(): void {
   const s = useStore((s) => s);
 
@@ -15,12 +36,12 @@ export function useSubscribePointer(): void {
     };
     window.addEventListener('pointermove', handlePointerMove, { signal: abortController.signal });
 
-    let immediate = setImmediate(function tick() {
+    let immediate = timeoutForSetImmediate(function tick() {
       s.features.layout.updatePointer({ ...current });
-      immediate = setImmediate(tick);
+      immediate = timeoutForSetImmediate(tick);
     });
     abortController.signal.addEventListener('abort', () => {
-      clearImmediate(immediate);
+      clearTimeoutForSetImmediate(immediate);
     });
 
     return () => {

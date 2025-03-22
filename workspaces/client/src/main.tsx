@@ -1,4 +1,4 @@
-// import '@wsh-2025/client/src/setups/polyfills';
+import '@wsh-2025/client/src/setups/polyfills';
 import '@wsh-2025/client/src/setups/luxon';
 import '@wsh-2025/client/src/setups/unocss';
 
@@ -28,5 +28,5 @@ function main() {
     </StrictMode>,
   );
 }
-
-document.addEventListener('DOMContentLoaded', main);
+main();
+// document.addEventListener('DOMContentLoaded', main);
