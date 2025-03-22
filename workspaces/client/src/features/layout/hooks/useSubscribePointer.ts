@@ -1,3 +1,5 @@
+// rootから取り除き済み
+
 import { useEffect } from 'react';
 
 import { useStore } from '@wsh-2025/client/src/app/StoreContext';
@@ -37,6 +39,7 @@ export function useSubscribePointer(): void {
     window.addEventListener('pointermove', handlePointerMove, { signal: abortController.signal, passive: true });
 
     let immediate = timeoutForSetImmediate(function tick() {
+      console.log('tickImmdisate')
       s.features.layout.updatePointer({ ...current });
       immediate = timeoutForSetImmediate(tick);
     });
