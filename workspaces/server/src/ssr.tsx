@@ -70,6 +70,10 @@ export function registerSsr(app: FastifyInstance): void {
       getFilePaths('public/logos', rootDir),
     ].flat();
 
+    const imageLink = imagePaths.map((imagePath) => `<link as="image" href="${imagePath}" rel="preload" fetchpriority="low"/>`).join('\n');
+    // 適当なpreloadをやめさせる
+    //           ${imagePaths.map((imagePath) => `<link as="image" href="${imagePath}" rel="preload" />`).join('\n')}
+
     console.log('end',performance.now())
     reply.type('text/html').send(/* html */ `
       <!DOCTYPE html>
@@ -77,7 +81,7 @@ export function registerSsr(app: FastifyInstance): void {
         <head>
           <meta charSet="UTF-8" />
           <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-          ${imagePaths.map((imagePath) => `<link as="image" href="${imagePath}" rel="preload" />`).join('\n')}
+          ${imageLink}
         </head>
         <div id="root">${appHtml}</div>
       </html>

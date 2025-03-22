@@ -2,12 +2,12 @@ import path from 'node:path';
 import webpack from 'webpack';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 
-console.log('webpack')
+console.log('webpack',  process?.env?.["NODE_ENV"])
 /**
  * NODE_ENV が 'development' なら true、そうでなければ false
  */
-const isDev = process.env["NODE_ENV"] === 'development';
-const isAnalyze = process.env["NODE_ENV"] === 'analyze';
+const isDev = process?.env?.["NODE_ENV"] === 'development';
+const isAnalyze = process?.env?.["NODE_ENV"] === 'analyze';
 /** @type {import('webpack').Configuration} */
 const config = {
   // mode と devtool を分岐
@@ -15,7 +15,6 @@ const config = {
   devtool: isDev ? 'inline-source-map' : false,
 
   entry: './src/main.tsx',
-
   module: {
     rules: [
       {
@@ -61,15 +60,17 @@ const config = {
 
   output: {
     chunkFilename: 'chunk-[contenthash].js',
-    chunkFormat: false,
+    chunkFormat: 'module',
+    module: true,
     filename: 'main.js',
     path: path.resolve(import.meta.dirname, './dist'),
     publicPath: 'auto',
   },
-
+  experiments: {
+    outputModule: true, // ESM出力を有効化
+  },
   plugins: [
-    new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }),
-    new webpack.EnvironmentPlugin({ API_BASE_URL: '/api', NODE_ENV: '' }),
+    new webpack.EnvironmentPlugin({ API_BASE_URL: '/api', NODE_ENV: isDev ? "production" : "development" }),
     // 開発環境のときだけ BundleAnalyzerPlugin を追加
     ...(isAnalyze ? [new BundleAnalyzerPlugin()] : []),
   ],
