@@ -86,6 +86,7 @@ export const episode = table(
     id: t.text().primaryKey(),
     description: t.text().notNull(),
     thumbnailUrl: t.text().notNull(),
+    previewUrl: t.text(),
     title: t.text().notNull(),
     order: t.integer().notNull(),
     seriesId: t

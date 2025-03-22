@@ -68,6 +68,7 @@ export function registerSsr(app: FastifyInstance): void {
       getFilePaths('public/images', rootDir),
       getFilePaths('public/animations', rootDir),
       getFilePaths('public/logos', rootDir),
+      getFilePaths('public/preview', rootDir),
     ].flat();
 
     console.log('end',performance.now())

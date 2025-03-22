@@ -9,6 +9,13 @@ import { DateTime } from 'luxon';
 
 import { getDatabase } from '@wsh-2025/server/src/drizzle/database';
 
+// thumbnail
+import { Parser } from 'm3u8-parser';
+import {FFmpeg} from '@ffmpeg/ffmpeg';
+import { spawn } from 'node:child_process';
+import fs from 'fs/promises'
+import os from 'os'
+
 const SEQUENCE_DURATION_MS = 2 * 1000;
 const SEQUENCE_COUNT_PER_PLAYLIST = 10;
 
@@ -130,4 +137,61 @@ export function registerStreams(app: FastifyInstance): void {
 
     reply.type('application/vnd.apple.mpegurl').send(playlist.join('\n'));
   });
+}
+
+export const  createPreview = async ({id, numberOfChunks}: {id: string, numberOfChunks: number}) => {
+  // 1. concat 用のファイルリストを作成
+  //    FFmpeg の concat demuxer を使うには、ファイルの一覧を text で書く必要がある
+  //    "file '/absolute/path/to/000.ts'\nfile '/absolute/path/to/001.ts'..." という形式
+
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'preview-'));
+  const listFilePath = path.join(tmpDir, 'list.txt');
+  const segments = [];
+
+  for (let i = 0; i < numberOfChunks; i++) {
+    // streams/${id}/${String(i).padStart(3, '0')}.ts
+    segments.push(
+      `file '${path.resolve(__dirname, '../streams', id, String(i).padStart(3, '0') + '.ts')}'`
+    );
+  }
+
+  console.log('createPreview:segment', segments)
+  await fs.writeFile(listFilePath, segments.join('\n'), 'utf-8');
+
+  // 2. 出力先を決める
+  const outputPath = path.join(tmpDir, 'preview.jpg');
+  console.log('createPreview:outputPath', outputPath)
+  // 3. FFmpeg 実行
+  //    concat demuxerで一本化 → fps=1, tile=5x2で10枚のフレームを1枚のJPEGに
+  const ffmpegArgs = [
+    '-y',
+    '-f', 'concat',        // concat demuxer
+    '-safe', '0',          // パスにスペースがあってもOK
+    '-i', listFilePath,
+    '-vf', "fps=1,scale=160:90,tile=5x2",
+    '-frames:v', '1',
+    outputPath,
+  ];
+
+  await new Promise<void>((resolve, reject) => {
+    console.log('createPreview:Promise:start')
+    const ff = spawn('ffmpeg', ffmpegArgs);
+    console.log('createPreview:Promise:ff')
+    ff.on('error', reject);
+    ff.on('exit', (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`ffmpeg exited with code: ${code}`));
+    });
+  });
+
+  // 4. 生成された preview.jpg を最終的にどこかに保存 or そのまま読み込む
+  //    ここではBase64化して返す例としてみます（実際はファイルのままでもOK）
+  const buffer = await fs.readFile(outputPath);
+  const pathStr = path.join(__dirname, '../../..')
+  const linkStr = path.join(pathStr, `public/preview/${id}.jpeg`)
+  console.log('pathJoin', pathStr)
+  await fs.appendFile(linkStr, buffer)
+  const base64 = buffer.toString('base64');
+  console.log('base64', base64)
+  return `${id}.jpeg`;
 }

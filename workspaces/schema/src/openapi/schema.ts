@@ -28,6 +28,9 @@ const episode = z.object({
   thumbnailUrl: z.string().openapi({
     example: 'https://image.example.com/assets/d13d2e22-a7ff-44ba-94a3-5f025f2b63cd.png',
   }),
+  previewUrl: z.string().openapi({
+    example: 'https://image.example.com/assets/d13d2e22-a7ff-44ba-94a3-5f025f2b63cd.png',
+  }),
   premium: z.boolean().openapi({ example: false }),
 });
 assertSchema(episode, createSelectSchema(databaseSchema.episode));

@@ -10,6 +10,7 @@ import { fetchLoremIpsumWordList } from '@wsh-2025/server/tools/fetch_lorem_ipsu
 import * as bcrypt from 'bcrypt';
 import path from 'node:path';
 import { readdirSync } from 'node:fs';
+import { createPreview } from '@wsh-2025/server/src/streams';
 
 function getFiles(parent: string): string[] {
   const dirents = readdirSync(parent, { withFileTypes: true });
@@ -99,16 +100,16 @@ async function main() {
 
     await reset(database, schema);
 
+    const streamRawList = [{ id: 'caminandes2', numberOfChunks: 73 },
+    { id: 'dailydweebs', numberOfChunks: 30 },
+    { id: 'glasshalf', numberOfChunks: 96 },
+    { id: 'wing-it', numberOfChunks: 117 }]
+
     // Create streams
     console.log('Creating streams...',performance.now());
     const streamList = await database
       .insert(schema.stream)
-      .values([
-        { id: 'caminandes2', numberOfChunks: 73 },
-        { id: 'dailydweebs', numberOfChunks: 30 },
-        { id: 'glasshalf', numberOfChunks: 96 },
-        { id: 'wing-it', numberOfChunks: 117 },
-      ])
+      .values(streamRawList)
       .returning();
 
     // Create channels
@@ -142,19 +143,37 @@ async function main() {
     console.log('Creating episodes...', performance.now());
     const episodeList: (typeof schema.episode.$inferSelect)[] = [];
     for (const series of seriesList) {
-      const data: (typeof schema.episode.$inferInsert)[] = Array.from(
+      const data: (typeof schema.episode.$inferInsert)[] =Array.from(
         { length: faker.number.int({ max: 20, min: 10 }) },
-        (_, idx) => ({
-          description: faker.lorem.paragraph({ max: 200, min: 100 }).replace(/\s/g, '').replace(/\./g, '。'),
-          id: faker.string.uuid(),
-          order: idx + 1,
-          seriesId: series.id,
-          streamId: faker.helpers.arrayElement(streamList).id,
-          thumbnailUrl: `${faker.helpers.arrayElement(imagePaths)}?version=${faker.string.nanoid()}`,
-          title: `第${String(idx + 1)}話 ${faker.helpers.arrayElement(episodeTitleList)}`,
-          premium: idx % 5 === 0,
-        }),
+        (_, idx) => 
+          {
+            const id = faker.string.uuid();
+            return {
+              description: faker.lorem.paragraph({ max: 200, min: 100 }).replace(/\s/g, '').replace(/\./g, '。'),
+              id,
+              order: idx + 1,
+              seriesId: series.id,
+              streamId: faker.helpers.arrayElement(streamList).id,
+              thumbnailUrl: `${faker.helpers.arrayElement(imagePaths)}?version=${faker.string.nanoid()}`,
+              previewUrl: `${faker.helpers.arrayElement(streamList).id}.jpeg`,
+              title: `第${String(idx + 1)}話 ${faker.helpers.arrayElement(episodeTitleList)}`,
+              premium: idx % 5 === 0,
+            }
+        },
       );
+      console.log('previewinit')
+      for (let i = 0; i< data.length; i++) {
+        const streamId = data[i]?.streamId
+        const stream = streamRawList.find(v => v.id === streamId)
+        console.log('info', streamId, stream, !!data[i])
+        if (streamId !== undefined && stream !== undefined && data[i]) {
+          try {
+        (data[i] as any).previewUrl = await createPreview(stream) ?? ""
+          } catch (error) {
+            console.log("previewUrlerror", error)
+          }
+        }
+      }
       const result = await database.insert(schema.episode).values(data).returning();
       episodeList.push(...result);
     }

@@ -2,6 +2,7 @@
   "private": true,
   "license": "MPL-2.0",
   "scripts": {
+    "db:init": "wireit",
     "build": "wireit",
     "build:dev": "wireit",
     "build:analyze": "wireit",
@@ -33,6 +34,12 @@
     }
   },
   "wireit": {
+    "db:init": {
+      "dependencies": [
+        "./workspaces/server:database:migrate",
+        "./workspaces/server:database:reset"
+      ]
+    },
     "start": {
       "dependencies": [
         "./workspaces/server:start"

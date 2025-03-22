@@ -8,6 +8,7 @@ CREATE TABLE `episode` (
 	`id` text PRIMARY KEY NOT NULL,
 	`description` text NOT NULL,
 	`thumbnailUrl` text NOT NULL,
+	`previewUrl` text NOT NULL,
 	`title` text NOT NULL,
 	`order` integer NOT NULL,
 	`seriesId` text NOT NULL,
