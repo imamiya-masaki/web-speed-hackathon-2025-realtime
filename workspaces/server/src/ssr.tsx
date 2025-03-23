@@ -57,8 +57,8 @@ export function registerSsr(app: FastifyInstance): void {
     const appHtml = renderToString(
       <StrictMode>
         <StoreProvider createStore={() => store}>
-          <StaticRouterProvider context={context} hydrate={true} router={router} />
-        </StoreProvider>
+          <StaticRouterProvider context={context} hydrate={false} router={router} />
+          </StoreProvider>
       </StrictMode>,
     );
 
@@ -78,10 +78,12 @@ export function registerSsr(app: FastifyInstance): void {
     console.log('end',performance.now(), store.getState())
     reply.type('text/html').send(/* html */ `
       <!DOCTYPE html>
-      <html lang="ja">
+      <html lang="ja" style="width: 100%; height: 100%;">
         <head>
           <meta charSet="UTF-8" />
           <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+          <link rel="stylesheet" href="@unocss/reset/tailwind-compat.css">
+          <link rel="stylesheet" href="uno.css">
           ${imageLink ?? ""}
         </head>
         <script>
@@ -93,7 +95,10 @@ export function registerSsr(app: FastifyInstance): void {
       <script>
       window.__initialStoreState = ${htmlescape(store.getState())};
       </script>
+      <body style="width: 100%; height: 100%;--un-bg-opacity: 1;--un-text-opacity: 1;background-color: rgb(0 0 0 / var(--un-bg-opacity));color: rgb(255 255 255 / var(--un-text-opacity));">
         <div id="root">${appHtml}</div>
+        </body>
+        <script src="/public/main.js"></script>
       </html>
     `);
   });
