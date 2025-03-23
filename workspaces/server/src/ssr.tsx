@@ -1,4 +1,4 @@
-import { readdirSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -62,6 +62,13 @@ export function registerSsr(app: FastifyInstance): void {
       </StrictMode>,
     );
 
+    const unocssPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), './unocss.html');
+    let unocssContent = '';
+    try {
+      unocssContent = readFileSync(unocssPath, 'utf-8');
+    } catch (error) {
+      console.error('unocss.html の読み込みに失敗:', error);
+    }
 
     const rootDir = path.resolve(__dirname, '../../../');
     const imagePaths = [
@@ -79,11 +86,11 @@ export function registerSsr(app: FastifyInstance): void {
     reply.type('text/html').send(/* html */ `
       <!DOCTYPE html>
       <html lang="ja" style="width: 100%; height: 100%;">
+      ${unocssContent}
         <head>
+        
           <meta charSet="UTF-8" />
           <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-          <link rel="stylesheet" href="@unocss/reset/tailwind-compat.css">
-          <link rel="stylesheet" href="uno.css">
           ${imageLink ?? ""}
         </head>
         <script>
