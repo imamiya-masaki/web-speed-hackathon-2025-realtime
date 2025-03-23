@@ -2,7 +2,7 @@ import '@wsh-2025/client/src/setups/polyfills';
 import '@wsh-2025/client/src/setups/luxon';
 // import '@wsh-2025/client/src/setups/unocss';
 
-import { StrictMode } from 'react';
+
 import { hydrateRoot } from 'react-dom/client';
 import { createBrowserRouter, HydrationState, RouterProvider } from 'react-router';
 
@@ -28,14 +28,15 @@ function main() {
   const router = createBrowserRouter(createRoutes(store), {hydrationData: initialHydration});
   performance.mark('router:start')
   console.log('router', performance.now());
-
+  const root = document.getElementById("root")
+  if (!root) {
+    return;
+  }
   hydrateRoot(
-    document.getElementById("root") ?? document,
-    <StrictMode>
+   root,
       <StoreProvider createStore={() => store}>
         <RouterProvider router={router} />
-      </StoreProvider>
-    </StrictMode>,
+      </StoreProvider>,
   );
 }
 main();
